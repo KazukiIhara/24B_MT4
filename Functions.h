@@ -11,6 +11,4 @@ static const int kColumnWidth = 60;
 // 4x4行列を描画する関数
 void MatrixScreenPrintf(int x, int y, const Matrix4x4& matrix, const char* label);
 
-float Length(Vector3 a);
-
-Vector3 Normalize(Vector3 a);
+Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle);

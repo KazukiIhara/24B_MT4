@@ -5,30 +5,45 @@ void MatrixScreenPrintf(int x, int y, const Matrix4x4& matrix, const char* label
 		for (int column = 0; column < 4; column++) {
 			Novice::ScreenPrintf
 			(
-				x + column * kColumnWidth, y + (row + 1) * kRowHeight, "%6.02f", matrix.m[row][column]
+				x + column * kColumnWidth, y + (row + 1) * kRowHeight, "%6.03f", matrix.m[row][column]
 			);
 		}
 	}
 	Novice::ScreenPrintf(x, y, "%s", label);
 }
 
-float Length(Vector3 a) {
-	return std::sqrtf(a.x * a.x + a.y * a.y + a.z * a.z);
-}
+Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle) {
 
-Vector3 Normalize(Vector3 a) {
-	float length = Length(a);
-	Vector3 normalizedVector;
+	Vector3 u = axis;
+	float x = u.x;
+	float y = u.y;
+	float z = u.z;
 
-	if (length != 0) {
-		normalizedVector.x = a.x / length;
-		normalizedVector.y = a.y / length;
-		normalizedVector.z = a.z / length;
-	} else {
-		normalizedVector.x = 0;
-		normalizedVector.y = 0;
-		normalizedVector.z = 0;
-	}
+	float c = std::cos(-angle);
+	float s = std::sin(-angle);
+	float sub = 1.0f - c;
 
-	return normalizedVector;
+	Matrix4x4 rotation;
+
+	rotation.m[0][0] = c + x * x * sub;
+	rotation.m[0][1] = x * y * sub - z * s;
+	rotation.m[0][2] = x * z * sub + y * s;
+	rotation.m[0][3] = 0.0f;
+
+	rotation.m[1][0] = y * x * sub + z * s;
+	rotation.m[1][1] = c + y * y * sub;
+	rotation.m[1][2] = y * z * sub - x * s;
+	rotation.m[1][3] = 0.0f;
+
+	rotation.m[2][0] = z * x * sub - y * s;
+	rotation.m[2][1] = z * y * sub + x * s;
+	rotation.m[2][2] = c + z * z * sub;
+	rotation.m[2][3] = 0.0f;
+
+	rotation.m[3][0] = 0.0f;
+	rotation.m[3][1] = 0.0f;
+	rotation.m[3][2] = 0.0f;
+	rotation.m[3][3] = 1.0f;
+
+	return rotation;
 }

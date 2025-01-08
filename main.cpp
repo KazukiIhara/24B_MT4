@@ -5,6 +5,7 @@
 const char kWindowTitle[] = "学籍番号";
 
 using namespace KamataEngine;
+using namespace MathUtility;
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -16,8 +17,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char keys[256] = { 0 };
 	char preKeys[256] = { 0 };
 
-	Vector3 axis = Normalize({ 1.0f,1.0f,1.0f });
+	Vector3 axis = { 1.0f,1.0f,1.0f };
+	axis = Normalize(axis);
 	float angle = 0.44f;
+	Matrix4x4 rotateMatrix = MakeRotateAxisAngle(axis, angle);
+
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -40,7 +44,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
-		MatrixScreenPrintf(0, 0, , "RotateMatrix");
+		MatrixScreenPrintf(0, 0, rotateMatrix, "RotateMatrix");
 
 		///
 		/// ↑描画処理ここまで
