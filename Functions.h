@@ -17,6 +17,8 @@ void MatrixScreenPrintf(int x, int y, const Matrix4x4& matrix, const char* label
 
 void QuaternionScreenPrintf(int x, int y, const Quaternion& matrix, const char* label);
 
+void VectorScreenPrintf(int x, int y, const Vector3& vector3, const char* label);
+
 Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle);
 
 Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to);
@@ -33,3 +35,9 @@ float Norm(const Quaternion& quaternion);
 Quaternion Normalize(const Quaternion& quaternion);
 // 逆クオータニオンを返す
 Quaternion Inverse(const Quaternion& quaternion);
+// 任意回転軸を表すクオータニオンの生成
+Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle);
+// ベクトルをクオータニオンで回転させた結果のベクトルを求める
+Vector3 RotateVector(const Vector3& vector, const Quaternion& quaternion);
+// Quaternionから回転行列を求める
+Matrix4x4 MakeRotateMatrix(const Quaternion& quaternion);
