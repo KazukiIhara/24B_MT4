@@ -107,5 +107,6 @@
       <Filter>KamataEngine\Include</Filter>
     </ClInclude>
     <ClInclude Include="Functions.h" />
+    <ClInclude Include="Quaternion.h" />
   </ItemGroup>
 </Project>
