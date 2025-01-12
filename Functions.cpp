@@ -1,9 +1,11 @@
 #define NOMINMAX
 #include "Functions.h"
 
+#include <array>
 #include <cmath>
 #include <algorithm>
 #include <numbers>
+#include <stdexcept>
 
 static const float EPSILON = 1.0e-6f;
 
@@ -15,6 +17,22 @@ void MatrixScreenPrintf(int x, int y, const Matrix4x4& matrix, const char* label
 				x + column * kColumnWidth, y + (row + 1) * kRowHeight, "%6.03f", matrix.m[row][column]
 			);
 		}
+	}
+	Novice::ScreenPrintf(x, y, "%s", label);
+}
+
+void QuaternionScreenPrintf(int x, int y, const Quaternion& q, const char* label) {
+	std::array<float, 4> quaternion;
+	quaternion[0] = q.x;
+	quaternion[1] = q.y;
+	quaternion[2] = q.z;
+	quaternion[3] = q.w;
+
+	for (int column = 0; column < 4; column++) {
+		Novice::ScreenPrintf
+		(
+			x + column * kColumnWidth, y + 1 * kRowHeight, "%6.02f", quaternion[column]
+		);
 	}
 	Novice::ScreenPrintf(x, y, "%s", label);
 }
@@ -106,4 +124,94 @@ Matrix4x4 DirectionToDirection(const Vector3& from, const Vector3& to) {
 		axis = Vector3(axis.x / axisLen, axis.y / axisLen, axis.z / axisLen);
 		return MakeRotateAxisAngle(axis, angle);
 	}
+}
+
+Quaternion Multiply(const Quaternion& lhs, const Quaternion& rhs) {
+	float x1 = lhs.x, y1 = lhs.y, z1 = lhs.z, w1 = lhs.w;
+	float x2 = rhs.x, y2 = rhs.y, z2 = rhs.z, w2 = rhs.w;
+
+	Quaternion result;
+	// x, y, z, w の順で格納
+	result.x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2;
+	result.y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2;
+	result.z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2;
+	result.w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2;
+
+	return result;
+}
+
+Quaternion IdentityQuaternion() {
+	Quaternion q;
+	q.x = 0.0f;
+	q.y = 0.0f;
+	q.z = 0.0f;
+	q.w = 1.0f;
+	return q;
+}
+
+Quaternion Conjugate(const Quaternion& quaternion) {
+	Quaternion result;
+	result.x = -quaternion.x;
+	result.y = -quaternion.y;
+	result.z = -quaternion.z;
+	result.w = quaternion.w;
+	return result;
+}
+
+float Norm(const Quaternion& quaternion) {
+	return std::sqrt(
+		quaternion.x * quaternion.x +
+		quaternion.y * quaternion.y +
+		quaternion.z * quaternion.z +
+		quaternion.w * quaternion.w
+	);
+}
+
+Quaternion Normalize(const Quaternion& quaternion) {
+	// ノルムを求める
+	float length = Norm(quaternion);
+
+	// ノルムが 0 の場合は正規化できない
+	if (length == 0.0f) {
+		throw std::runtime_error("Cannot normalize a zero-norm quaternion.");
+	}
+
+	// 逆数を計算
+	float inv_length = 1.0f / length;
+
+	// 正規化したクオータニオンを返す
+	Quaternion result;
+	result.x = quaternion.x * inv_length;
+	result.y = quaternion.y * inv_length;
+	result.z = quaternion.z * inv_length;
+	result.w = quaternion.w * inv_length;
+	return result;
+}
+
+Quaternion Inverse(const Quaternion& quaternion) {
+	float norm_sq =
+		quaternion.x * quaternion.x +
+		quaternion.y * quaternion.y +
+		quaternion.z * quaternion.z +
+		quaternion.w * quaternion.w;
+
+	if (norm_sq == 0.0f) {
+		// ノルムが0の場合は逆が定義できないため例外を投げる
+		throw std::runtime_error("Cannot invert a zero-norm quaternion.");
+	}
+
+	// 協約
+	Quaternion conj = Conjugate(quaternion);
+
+	// 1 / ノルム^2
+	float inv_norm = 1.0f / norm_sq;
+
+	// 結果を格納
+	Quaternion result;
+	result.x = conj.x * inv_norm;
+	result.y = conj.y * inv_norm;
+	result.z = conj.z * inv_norm;
+	result.w = conj.w * inv_norm;
+
+	return result;
 }
