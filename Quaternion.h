@@ -1,6 +1,6 @@
 #pragma once
 
-// ƒNƒI[ƒ^ƒjƒIƒ“\‘¢‘Ì
+// ã‚¯ã‚ªãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³æ§‹é€ ä½“
 struct Quaternion {
 	float x;
 	float y;

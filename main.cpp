@@ -48,7 +48,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
+		QuaternionScreenPrintf(0, 0, identity, "Identity");
+		QuaternionScreenPrintf(0, kRowHeight * 2, conj, "Conjugate");
+		QuaternionScreenPrintf(0, kRowHeight * 4, inv, "Inverse");
+		QuaternionScreenPrintf(0, kRowHeight * 6, normal, "Identity");
+		QuaternionScreenPrintf(0, kRowHeight * 8, mul1, "Multiply(q1,q2)");
+		QuaternionScreenPrintf(0, kRowHeight * 10, mul2, "Multiply(q2,q1)");
 
+
+		Novice::ScreenPrintf(0, kRowHeight * 12, "Norm");
+		Novice::ScreenPrintf(0, kRowHeight * 13, "%6.02f", norm);
 
 		///
 		/// ↑描画処理ここまで

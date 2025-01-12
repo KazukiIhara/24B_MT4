@@ -1,6 +1,7 @@
 #define NOMINMAX
 #include "Functions.h"
 
+#include <array>
 #include <cmath>
 #include <algorithm>
 #include <numbers>
@@ -16,6 +17,22 @@ void MatrixScreenPrintf(int x, int y, const Matrix4x4& matrix, const char* label
 				x + column * kColumnWidth, y + (row + 1) * kRowHeight, "%6.03f", matrix.m[row][column]
 			);
 		}
+	}
+	Novice::ScreenPrintf(x, y, "%s", label);
+}
+
+void QuaternionScreenPrintf(int x, int y, const Quaternion& q, const char* label) {
+	std::array<float, 4> quaternion;
+	quaternion[0] = q.x;
+	quaternion[1] = q.y;
+	quaternion[2] = q.z;
+	quaternion[3] = q.w;
+
+	for (int column = 0; column < 4; column++) {
+		Novice::ScreenPrintf
+		(
+			x + column * kColumnWidth, y + 1 * kRowHeight, "%6.02f", quaternion[column]
+		);
 	}
 	Novice::ScreenPrintf(x, y, "%s", label);
 }
