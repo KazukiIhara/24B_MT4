@@ -37,6 +37,21 @@ void QuaternionScreenPrintf(int x, int y, const Quaternion& q, const char* label
 	Novice::ScreenPrintf(x, y, "%s", label);
 }
 
+void VectorScreenPrintf(int x, int y, const Vector3& vector3, const char* label) {
+	std::array<float, 3> vector;
+	vector[0] = vector3.x;
+	vector[1] = vector3.y;
+	vector[2] = vector3.z;
+
+	for (int column = 0; column < 3; column++) {
+		Novice::ScreenPrintf
+		(
+			x + column * kColumnWidth, y + 1 * kRowHeight, "%6.02f", vector[column]
+		);
+	}
+	Novice::ScreenPrintf(x, y, "%s", label);
+}
+
 Matrix4x4 MakeRotateAxisAngle(const Vector3& axis, float angle) {
 
 	Vector3 u = axis;
@@ -214,4 +229,115 @@ Quaternion Inverse(const Quaternion& quaternion) {
 	result.w = conj.w * inv_norm;
 
 	return result;
+}
+
+Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle) {
+	// 軸ベクトルの長さを求める
+	float axis_len = std::sqrt(axis.x * axis.x + axis.y * axis.y + axis.z * axis.z);
+
+	// 軸ベクトルがゼロ長なら回転を定義できないので、適宜例外を投げる
+	if (axis_len == 0.0f) {
+		throw std::runtime_error("Axis vector has zero length. Cannot create rotation quaternion.");
+	}
+
+	// 正規化した軸ベクトル
+	float inv_len = 1.0f / axis_len;
+	float nx = axis.x * inv_len;
+	float ny = axis.y * inv_len;
+	float nz = axis.z * inv_len;
+
+	// 回転角を2で割った値
+	float half_angle = angle * 0.5f;
+	float s = std::sin(half_angle);
+	float c = std::cos(half_angle);
+
+	// クオータニオン (x, y, z, w) の順で格納
+	Quaternion q;
+	q.x = nx * s;
+	q.y = ny * s;
+	q.z = nz * s;
+	q.w = c;
+
+	return q;
+}
+
+Vector3 RotateVector(const Vector3& vector, const Quaternion& quaternion) {
+	// ベクトル -> クオータニオン (w=0)
+	Quaternion p;
+	p.x = vector.x;
+	p.y = vector.y;
+	p.z = vector.z;
+	p.w = 0.0f;
+
+	// q * p
+	// (x, y, z, w) の順で計算
+	Quaternion r1;
+	r1.x = quaternion.w * p.x + quaternion.y * p.z - quaternion.z * p.y;
+	r1.y = quaternion.w * p.y + quaternion.z * p.x - quaternion.x * p.z;
+	r1.z = quaternion.w * p.z + quaternion.x * p.y - quaternion.y * p.x;
+	// w成分は - (q.x p.x + q.y p.y + q.z p.z)
+	r1.w = -(quaternion.x * p.x + quaternion.y * p.y + quaternion.z * p.z);
+
+	// conj(q) = (-x, -y, -z, w)
+	Quaternion conj_q;
+	conj_q.x = -quaternion.x;
+	conj_q.y = -quaternion.y;
+	conj_q.z = -quaternion.z;
+	conj_q.w = quaternion.w;
+
+	// r1 * conj(q)
+	Quaternion r2;
+	r2.x = r1.w * conj_q.x + r1.x * conj_q.w + r1.y * conj_q.z - r1.z * conj_q.y;
+	r2.y = r1.w * conj_q.y + r1.y * conj_q.w + r1.z * conj_q.x - r1.x * conj_q.z;
+	r2.z = r1.w * conj_q.z + r1.z * conj_q.w + r1.x * conj_q.y - r1.y * conj_q.x;
+	r2.w = r1.w * conj_q.w - r1.x * conj_q.x - r1.y * conj_q.y - r1.z * conj_q.z;
+
+	// 回転結果ベクトル (r2 の x, y, z を返す)
+	Vector3 rotated;
+	rotated.x = r2.x;
+	rotated.y = r2.y;
+	rotated.z = r2.z;
+
+	return rotated;
+}
+
+Matrix4x4 MakeRotateMatrix(const Quaternion& q) {
+	Matrix4x4 mat;
+
+	float xx = q.x * q.x;
+	float yy = q.y * q.y;
+	float zz = q.z * q.z;
+	float xy = q.x * q.y;
+	float yz = q.y * q.z;
+	float zx = q.z * q.x;
+	float wx = q.w * q.x;
+	float wy = q.w * q.y;
+	float wz = q.w * q.z;
+
+	// 行 (i), 列 (j) の順で代入
+	// row 0
+	mat.m[0][0] = 1.0f - 2.0f * (yy + zz);
+	mat.m[0][1] = 2.0f * (xy + wz);
+	mat.m[0][2] = 2.0f * (zx - wy);
+	mat.m[0][3] = 0.0f;
+
+	// row 1
+	mat.m[1][0] = 2.0f * (xy - wz);
+	mat.m[1][1] = 1.0f - 2.0f * (xx + zz);
+	mat.m[1][2] = 2.0f * (yz + wx);
+	mat.m[1][3] = 0.0f;
+
+	// row 2
+	mat.m[2][0] = 2.0f * (zx + wy);
+	mat.m[2][1] = 2.0f * (yz - wx);
+	mat.m[2][2] = 1.0f - 2.0f * (xx + yy);
+	mat.m[2][3] = 0.0f;
+
+	// row 3
+	mat.m[3][0] = 0.0f;
+	mat.m[3][1] = 0.0f;
+	mat.m[3][2] = 0.0f;
+	mat.m[3][3] = 1.0f;
+
+	return mat;
 }
