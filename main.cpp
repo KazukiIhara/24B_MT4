@@ -1,6 +1,7 @@
 #include <Novice.h>
 
 #include "Functions.h"
+#include <numbers>
 
 const char kWindowTitle[] = "学籍番号";
 
@@ -17,13 +18,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char keys[256] = { 0 };
 	char preKeys[256] = { 0 };
 
-	Vector3 axis = { 1.0f,0.4f,-0.2f };
-	axis = Normalize(axis);
-	Vector3 pointY = { 2.1f,-0.9f,1.3f };
-	Quaternion rotation = MakeRotateAxisAngleQuaternion(axis, 0.45f);
-	Matrix4x4 rotateMatrix = MakeRotateMatrix(rotation);
-	Vector3 rotateByQuaternion = RotateVector(pointY, rotation);
-	Vector3 rotateByMatrix = Transform(pointY, rotateMatrix);
+
+	Quaternion rotation0 = MakeRotateAxisAngleQuaternion({ 0.71f,0.71f,0.0f }, 0.3f);
+	Quaternion rotation1 = MakeRotateAxisAngleQuaternion({ 0.71f,0.0f,0.71f }, 3.141592f);
+
+
+	Quaternion interpolate0 = Slerp(rotation0, rotation1, 0.0f);
+	Quaternion interpolate1 = Slerp(rotation0, rotation1, 0.3f);
+	Quaternion interpolate2 = Slerp(rotation0, rotation1, 0.5f);
+	Quaternion interpolate3 = Slerp(rotation0, rotation1, 0.7f);
+	Quaternion interpolate4 = Slerp(rotation0, rotation1, 1.0f);
 
 
 	// ウィンドウの×ボタンが押されるまでループ
@@ -47,10 +51,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
-		QuaternionScreenPrintf(0, 0, rotation, "Rotation");
-		MatrixScreenPrintf(0, kRowHeight * 2, rotateMatrix, "RotateMatrix");
-		VectorScreenPrintf(0, kRowHeight * 7, rotateByQuaternion, "RotateByQuaternion");
-		VectorScreenPrintf(0, kRowHeight * 9, rotateByMatrix, "RotateByMatrix");
+		QuaternionScreenPrintf(0, 0, interpolate0, "interpolate0");
+		QuaternionScreenPrintf(0, kRowHeight * 2, interpolate1, "interpolate1");
+		QuaternionScreenPrintf(0, kRowHeight * 4, interpolate2, "interpolate2");
+		QuaternionScreenPrintf(0, kRowHeight * 6, interpolate3, "interpolate3");
+		QuaternionScreenPrintf(0, kRowHeight * 8, interpolate4, "interpolate4");
+
 
 
 		///
