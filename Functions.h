@@ -41,3 +41,6 @@ Quaternion MakeRotateAxisAngleQuaternion(const Vector3& axis, float angle);
 Vector3 RotateVector(const Vector3& vector, const Quaternion& quaternion);
 // Quaternionから回転行列を求める
 Matrix4x4 MakeRotateMatrix(const Quaternion& quaternion);
+
+// 球面線形補完
+Quaternion Slerp(Quaternion q1, Quaternion q2, float t);
