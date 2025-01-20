@@ -346,26 +346,23 @@ Quaternion Slerp(Quaternion q1, Quaternion q2, float t) {
 	// クォータニオンの内積を計算
 	float dot = q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
 
-	// ドット積が負の場合、逆の方向に補間するために q2 を反転
+	// ドット積が負の場合、逆の方向に補間するために q1 を反転
 	if (dot < 0.0f) {
-		q2.x = -q2.x;
-		q2.y = -q2.y;
-		q2.z = -q2.z;
-		q2.w = -q2.w;
+		q1.x = -q1.x;
+		q1.y = -q1.y;
+		q1.z = -q1.z;
+		q1.w = -q1.w;
 		dot = -dot;
 	}
 
-	// 補間係数を使った係数の計算
-	const float threshold = 0.9995f;
-	if (dot > threshold) {
-		// ドット積が閾値を超えた場合、線形補間を実行（角度が小さいため）
-		Quaternion result = {
-			q1.x + t * (q2.x - q1.x),
-			q1.y + t * (q2.y - q1.y),
-			q1.z + t * (q2.z - q1.z),
-			q1.w + t * (q2.w - q1.w)
-		};
-		return Normalize(result); // 結果を正規化
+	if (dot >= 1.0f - EPSILON) {
+		Quaternion result{};
+		result.x = (1.0f - t) * q1.x + t * q2.x;
+		result.y = (1.0f - t) * q1.y + t * q2.y;
+		result.z = (1.0f - t) * q1.z + t * q2.z;
+		result.w = (1.0f - t) * q1.w + t * q2.w;
+
+		return Normalize(result);
 	}
 
 	// 角度の計算
